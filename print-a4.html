@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="mr">
+<head>
+<meta charset="utf-8">
+<title>हॉटेल शिवकृपा — मेनू कार्ड A4</title>
+<style>
+:root{--maroon:#7a1f16;--saffron:#d98a1c;--cream:#fdf8ee;--ink:#241a15;--muted:#8a7566;--line:#dccbb0;--dot:#bda78b}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Noto Sans Devanagari","Mukta","Kohinoor Devanagari","Nirmala UI","Segoe UI",sans-serif;color:var(--ink);background:#e7e3dc;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* ---------- page ---------- */
+@page{size:A4;margin:0}
+.page{width:210mm;height:297mm;padding:14mm 16mm;background:var(--cream);position:relative;display:flex;flex-direction:column;page-break-after:always;overflow:hidden}
+.page:last-child{page-break-after:auto}
+@media screen{body{padding:8mm 0}.page{margin:0 auto 10mm;box-shadow:0 2px 16px rgba(0,0,0,.18)}}
+
+/* double rule frame */
+.frame{position:absolute;inset:7mm;border:1.4pt solid var(--maroon);pointer-events:none}
+.frame::after{content:"";position:absolute;inset:1.8mm;border:.5pt solid var(--saffron)}
+
+/* ---------- page head / foot ---------- */
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:6mm;border-bottom:2pt solid var(--maroon);padding-bottom:2mm;margin-bottom:4mm}
+.ph .brand{font-size:13pt;font-weight:700;color:var(--maroon)}
+.ph .brand small{display:block;font-size:7.5pt;font-weight:400;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase}
+.ph .veg{font-size:8pt;color:#2e6b34;border:.6pt solid #2e6b34;padding:.8mm 2.2mm;border-radius:1mm;white-space:nowrap}
+.pf{display:flex;justify-content:space-between;font-size:8pt;color:var(--muted);border-top:.6pt solid var(--line);padding-top:2mm;margin-top:3mm}
+
+/* ---------- menu flow ---------- */
+.flow{flex:1;columns:2;column-gap:10mm;column-fill:balance}
+.sec{break-inside:avoid-column;margin:0 0 6mm}
+.sec h2{margin:0 0 2.5mm;display:inline-block;font-size:12pt;font-weight:700;color:#fff;background:var(--maroon);padding:1mm 4mm 1.4mm;border-radius:1mm;letter-spacing:.3px}
+.sec.special h2{background:var(--saffron)}
+.item{display:flex;align-items:baseline;font-size:10.5pt;line-height:1.62;break-inside:avoid}
+.item .nm{flex:0 1 auto}
+.item .dots{flex:1 1 6mm;border-bottom:.7pt dotted var(--dot);margin:0 2mm;position:relative;top:-.7mm}
+.item .pr{font-weight:700;font-variant-numeric:tabular-nums;color:var(--maroon);white-space:nowrap}
+.sec.special .item .pr{color:#8a5410}
+
+/* ---------- cover ---------- */
+.cover{justify-content:space-between;align-items:center;text-align:center}
+.cover .top{font-size:9pt;letter-spacing:4px;color:#2e6b34;margin-top:14mm}
+.cover h1{margin:0;font-size:52pt;line-height:1.06;color:var(--maroon);font-weight:800;letter-spacing:.5px}
+.cover h1 .hostel{display:block;font-size:17pt;font-weight:600;letter-spacing:6px;color:var(--saffron);margin-bottom:4mm}
+.cover .rule{display:flex;align-items:center;justify-content:center;gap:4mm;margin:7mm 0 5mm;color:var(--maroon)}
+.cover .rule i{width:26mm;height:.8pt;background:var(--maroon)}
+.cover .rule b{font-size:14pt;font-weight:600;letter-spacing:5px}
+.cover .card{font-size:10pt;letter-spacing:6px;color:var(--muted)}
+.cover .orn{margin:9mm 0;font-size:15pt;color:var(--saffron);letter-spacing:6px}
+.cover .foot{font-size:13pt;font-weight:700;color:var(--maroon);margin-bottom:16mm}
+.cover .foot span{font-weight:400;color:var(--muted);font-size:9pt;display:block;letter-spacing:1px;margin-bottom:1.5mm}
+</style>
+</head>
+<body>
+<div id="pages"></div>
+
+<script src="menu-data.js"></script>
+<script>
+const SEC = Object.fromEntries(MENU.map(s => [s.t, s]));
+const PAGES = [
+  {cover:true},
+  {secs:['चायनीज','चहा व थंड','आईस्क्रिम']},
+  {secs:['टाईम पास','तंदूरी रोटी','रोटी','पराठे']},
+  {secs:['महाराष्ट्रीयन डिश','स्पेशल']},
+  {secs:['मिक्स वेज डिश','पंजाबी डिश','राईस प्लेट','राईस']}
+];
+
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const head = `
+  <div class="ph">
+    <div class="brand">हॉटेल शिवकृपा<small>Shivkripa Restaurant</small></div>
+    <div class="veg">१००% शुद्ध शाकाहारी</div>
+  </div>`;
+
+function section(name){
+  const s = SEC[name];
+  if (!s) throw new Error('unknown section: ' + name);
+  const rows = s.items.map(([mr, , price]) => `
+    <div class="item">
+      <span class="nm">${esc(mr)}</span><span class="dots"></span>
+      <span class="pr">${price == null ? '—' : '₹ ' + price}</span>
+    </div>`).join('');
+  return `<div class="sec${name === 'स्पेशल' ? ' special' : ''}"><h2>${esc(name)}</h2>${rows}</div>`;
+}
+
+const out = PAGES.map((p, i) => {
+  if (p.cover) return `
+    <div class="page cover">
+      <div class="frame"></div>
+      <div class="top">शुद्ध शाकाहारी</div>
+      <div>
+        <h1><span class="hostel">हॉटेल</span>शिवकृपा</h1>
+        <div class="rule"><i></i><b>रेस्टॉरेंट</b><i></i></div>
+        <div class="card">मेनू कार्ड</div>
+        <div class="orn">❖</div>
+      </div>
+      <div class="foot"><span>मोबाईल</span>99212 15557</div>
+    </div>`;
+  return `
+    <div class="page">
+      <div class="frame"></div>
+      ${head}
+      <div class="flow">${p.secs.map(section).join('')}</div>
+      <div class="pf"><span>हॉटेल शिवकृपा रेस्टॉरेंट</span><span>मो. 99212 15557</span><span>${i + 1} / ${PAGES.length}</span></div>
+    </div>`;
+}).join('');
+
+document.getElementById('pages').innerHTML = out;
+</script>
+</body>
+</html>
