@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="mr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>हॉटेल शिवकृपा रेस्टॉरेंट — Menu</title>
+<style>
+:root{--bg:#120d0d;--panel:#1e1615;--gold:#f3c34d;--red:#c0392b;--ink:#f6f0e4;--mut:#a99c8d;--line:#3a2c28}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,"Noto Sans Devanagari","Noto Sans",sans-serif}
+header{padding:26px 16px 18px;text-align:center;background:radial-gradient(ellipse at top,#3a1d16,#120d0d 72%);border-bottom:3px solid var(--gold)}
+h1{margin:0;font-size:clamp(26px,7vw,40px);color:var(--gold);letter-spacing:.5px}
+.sub{color:var(--mut);font-size:13.5px;margin-top:4px}
+.phone a{color:var(--gold);text-decoration:none}
+.veg{display:inline-flex;gap:6px;align-items:center;font-size:12px;border:1px solid #2e7d32;color:#a5d6a7;border-radius:99px;padding:2px 10px;margin-top:10px}
+.veg i{width:8px;height:8px;border-radius:50%;background:#2e7d32;display:inline-block}
+nav{position:sticky;top:0;z-index:5;background:#170f0e;padding:10px 12px;display:flex;gap:8px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav a{flex:0 0 auto;color:var(--ink);text-decoration:none;font-size:13px;padding:6px 12px;border:1px solid var(--line);border-radius:99px;background:var(--panel)}
+nav a:hover{border-color:var(--gold);color:var(--gold)}
+#q{width:100%;margin:14px 0 0;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:15px}
+main{max-width:720px;margin:0 auto;padding:16px 14px 40px}
+section{margin-top:26px}
+h2{font-size:18px;color:var(--gold);border-bottom:2px solid var(--red);padding-bottom:6px;margin:0 0 4px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+h2 small{color:var(--mut);font-size:11px;font-weight:400;white-space:nowrap}
+.row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:9px 2px;border-bottom:1px dashed #2b211f}
+.row:last-of-type{border-bottom:0}
+.row .n{font-size:16px}
+.row .e{display:block;font-size:11.5px;color:var(--mut);letter-spacing:.2px}
+.row .p{color:var(--gold);white-space:nowrap;font-size:15px;padding-top:2px;font-variant-numeric:tabular-nums}
+.row.special .n{color:#ffd47e}
+.row.special{background:linear-gradient(90deg,#2a1c12,transparent)}
+sup.u{color:#ffb74d;cursor:help;font-size:10px}
+#empty{display:none;color:var(--mut);text-align:center;padding:30px 0}
+footer{color:var(--mut);font-size:12px;text-align:center;padding:22px 14px 40px;border-top:1px solid var(--line)}
+@media print{
+  body{background:#fff;color:#111}
+  header{background:#fff;border-bottom:2px solid #b3261e}
+  h1,h2{color:#b3261e}
+  nav,#q,footer{display:none}
+  .row .p{color:#111}
+  section{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>हॉटेल शिवकृपा</h1>
+  <div class="sub">रेस्टॉरेंट · प्रो.शा. केशव कंदे</div>
+  <div class="sub phone"><a href="tel:9921215557">📞 ९९२१२ १५५५७</a></div>
+  <div class="veg"><i></i>100% शाकाहारी</div>
+</header>
+
+<nav id="nav"></nav>
+
+<main>
+  <input id="q" type="search" placeholder="शोधा / search — पनीर, paneer, १५०…">
+  <div id="menu"></div>
+  <div id="empty">काही सापडले नाही — no items found</div>
+</main>
+
+<footer>₹ prices as printed on the photo menu · ⚠ = photo unclear, verify at counter</footer>
+
+<script src="menu-data.js"></script>
+<script>
+const nav = document.getElementById('nav');
+const menu = document.getElementById('menu');
+const empty = document.getElementById('empty');
+const q = document.getElementById('q');
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let total = 0;
+for (const [i, sec] of MENU.entries()) {
+  const id = 's' + i;
+  total += sec.items.length;
+  nav.insertAdjacentHTML('beforeend', `<a href="#${id}">${sec.t}</a>`);
+  menu.insertAdjacentHTML('beforeend', `
+    <section id="${id}">
+      <h2>${sec.t} <small>${sec.e} · ${sec.items.length}</small></h2>
+      ${sec.items.map(([mr, en, price, un]) => `
+        <div class="row${mr.includes('शिवकृपा') ? ' special' : ''}" data-k="${esc((mr + ' ' + en + ' ' + (price ?? '')).toLowerCase())}">
+          <div><span class="n">${mr}</span><span class="e">${en}</span></div>
+          <div class="p">${price == null ? '—' : '₹' + price}${un ? '<sup class="u" title="Photo unclear — verify">⚠</sup>' : ''}</div>
+        </div>`).join('')}
+    </section>`);
+}
+document.querySelector('footer').textContent = `${total} items · ₹ prices as printed on the photo menu · ⚠ = photo unclear, verify at counter`;
+
+q.addEventListener('input', () => {
+  const t = q.value.trim().toLowerCase();
+  let shown = 0;
+  for (const sec of document.querySelectorAll('section')) {
+    let vis = 0;
+    for (const row of sec.querySelectorAll('.row')) {
+      const hit = !t || row.dataset.k.includes(t);
+      row.style.display = hit ? '' : 'none';
+      if (hit) vis++;
+    }
+    sec.style.display = vis ? '' : 'none';
+    shown += vis;
+  }
+  empty.style.display = shown ? 'none' : 'block';
+});
+</script>
+</body>
+</html>
